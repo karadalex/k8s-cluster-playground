@@ -24,6 +24,34 @@ You can configure memory and number of cpus in the Vagrantfile and then reload t
 vagrant reload [vm-name]
 ```
 
+To connect the cluster to the kubectl outside of the vagrannt nodes
+```bash
+vagrant ssh master
+cat /home/vagrant/.kube/config
+```
+and copy the yaml data to the corresponding parts on you local kubectl file and then
+```bash
+kubectl config use-context kubernetes-admin@kubernetes
+```
+and verify whether you are in the correct cluster
+```bash
+kubectl get svc
+kubectl get nodes
+```
+
+To install the dashboard, via your local kubectl
+```bash
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.3.1/aio/deploy/recommended.yam
+kubectl proxy
+```
+To get a bearer token follow this guide [https://github.com/kubernetes/dashboard/blob/master/docs/user/access-control/creating-sample-user.md](https://github.com/kubernetes/dashboard/blob/master/docs/user/access-control/creating-sample-user.md) or run the following from this diretory
+```bash
+kubectl apply -f admin-user.yaml
+kubectl -n kubernetes-dashboard get secret $(kubectl -n kubernetes-dashboard get sa/admin-user -o jsonpath="{.secrets[0].name}") -o go-template="{{.data.token | base64decode}}"
+```
+and copy the output token to the browser
+
+
 ## Troubleshooting
 
 - A worker (e.g. worker1) hasn't joined the cluster successfully during provisioning
